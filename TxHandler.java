@@ -4,8 +4,9 @@ public class TxHandler {
 	 * transaction outputs) is utxoPool. This should make a defensive copy of 
 	 * utxoPool by using the UTXOPool(UTXOPool uPool) constructor.
 	 */
+	private UTXOPool utxoPool;
 	public TxHandler(UTXOPool utxoPool) {
-		// IMPLEMENT THIS
+		this.utxoPool = new UTXOPool(utxoPool);
 	}
 
 	/* Returns true if 
@@ -19,8 +20,36 @@ public class TxHandler {
 	 */
 
 	public boolean isValidTx(Transaction tx) {
-		// IMPLEMENT THIS
-		return false;
+		UTXOPool claimedUTXO = new UTXOPool();
+		double inputsum = 0;
+		double outputsum = 0;
+		for(int i =0;i < tx.numInputs();i++){
+			Transaction.Input in = tx.getInput(i);
+			Coin utxo = new Coin(in.prevTxhash,out.in.outputIndex);
+			if(!utxoPool.contains(utxo)){
+				return false;
+			}
+			Transaction.Output prevOutput = utxoPool.getTxOutput(utxo);
+			if(!Crypto.verifySignature(prevOutput.address, tx.getRawDataToSign(i),in.signature)){
+				return false;
+			}
+			if(claimedUTXO.contains(utxo)){
+				return false;
+			}
+			claimedUTXO.addCoin(utxo,prevOutput);
+			inputSum += prevOutput.value;
+		}
+		for(Transaction.Output out : tx.getOutputs()) {
+			if(out.value < 0) {
+				return false;
+			}
+			outputSum += out.value;
+		}
+		if(inputSum < outputSum){
+			return false;
+		}
+
+		return true;
 	}
 
 	/* Handles each epoch by receiving an unordered array of proposed 
@@ -29,8 +58,27 @@ public class TxHandler {
 	 * and updating the current UTXO pool as appropriate.
 	 */
 	public Transaction[] handleTxs(Transaction[] possibleTxs) {
-		// IMPLEMENT THIS
-		return null;
+		List<Transactions> acceptedTxs = new ArrayList<>();
+		boolean progress == true;
+		while(progress){
+			progress = false;
+			for (Transaction tx: possibleTxs) {
+				if (acceptedTxss.contains(tx)) continue;
+				if (isValidTx(tx)){
+					acceptedTxs.add(tx);
+					progress = true;
+					for (Transaction.Input in : tx.getInputs()) {
+						Coin utxo = new Coin(in.prevTxHash, in.outputIndex);
+						utxoPool.removeCoin(utxo);
+					}
+					for(int i = 0; i < tx.numOutputs(); i++){
+						Coin utxo = new Coin(tx.getHash(),i);
+						utxoPool.addCoin(utxo, tx.getOutput(i));
+					}
+				}
+			}
+		}
+		return acceptedTxs.toArray(new Transactions[0]);
 	}
 
 } 
