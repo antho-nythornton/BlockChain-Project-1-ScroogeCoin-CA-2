@@ -10,6 +10,6 @@ Anthony Sturrus - ajsturrus@csu.fullerton.edu
 
 Carlos Lopez - carlosjlopezz27@csu.fullerton.edu
 
-Ryan Takata - 
+Ryan Takata - ryan.takata@csu.fullerton.edu
 
 We implemented the extra credit file.
